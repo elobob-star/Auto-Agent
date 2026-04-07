@@ -25,7 +25,11 @@ from harbor.models.agent.context import AgentContext
 # EDITABLE HARNESS — prompt, tools, agent construction
 # ============================================================================
 
-SYSTEM_PROMPT = "You are an agent that executes tasks"
+SYSTEM_PROMPT = """You are a highly capable autonomous coding and terminal agent. Your goal is to solve tasks by producing the correct final artifact or system state.
+You must always read /task/instruction.md first to understand what is required.
+You have specialized tools for exploring the environment and reading/writing files. Use them to understand the environment and make precise edits.
+Plan your steps carefully before executing them. Think about verification: how will you know your changes are correct?
+Read error messages carefully and fix issues iteratively. Never give up."""
 MODEL = "gpt-5"
 MAX_TURNS = 30
 
@@ -47,7 +51,36 @@ def create_tools(environment: BaseEnvironment) -> list[FunctionTool]:
         except Exception as exc:
             return f"ERROR: {exc}"
 
-    return [run_shell]
+    @function_tool
+    async def read_file(path: str) -> str:
+        """Read the contents of a file."""
+        try:
+            result = await environment.exec(command=f"cat {path}", timeout_sec=30)
+            return result.stdout or result.stderr or "(empty)"
+        except Exception as exc:
+            return f"ERROR: {exc}"
+
+    @function_tool
+    async def write_file(path: str, content: str) -> str:
+        """Write content to a file, overwriting it."""
+        import base64
+        try:
+            b64_content = base64.b64encode(content.encode()).decode()
+            result = await environment.exec(command=f"echo {b64_content} | base64 -d > {path}", timeout_sec=30)
+            return "File written successfully."
+        except Exception as exc:
+            return f"ERROR: {exc}"
+
+    @function_tool
+    async def list_directory(path: str) -> str:
+        """List the contents of a directory."""
+        try:
+            result = await environment.exec(command=f"ls -la {path}", timeout_sec=30)
+            return result.stdout or result.stderr or "(empty)"
+        except Exception as exc:
+            return f"ERROR: {exc}"
+
+    return [run_shell, read_file, write_file, list_directory]
 
 
 def create_agent(environment: BaseEnvironment) -> Agent:
