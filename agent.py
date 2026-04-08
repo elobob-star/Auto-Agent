@@ -80,7 +80,24 @@ def create_tools(environment: BaseEnvironment) -> list[FunctionTool]:
         except Exception as exc:
             return f"ERROR: {exc}"
 
-    return [run_shell, read_file, write_file, list_directory]
+    @function_tool
+    async def python_eval(code: str) -> str:
+        '''Evaluate a python expression or script and return stdout and stderr.'''
+        import base64
+        try:
+            b64_code = base64.b64encode(code.encode()).decode()
+            result = await environment.exec(command=f'echo {b64_code} | base64 -d | python3', timeout_sec=60)
+            out = ''
+            if result.stdout:
+                out += result.stdout
+            if result.stderr:
+                nl = '\n'
+                out += f'{nl}STDERR:{nl}{result.stderr}' if out else f'STDERR:{nl}{result.stderr}'
+            return out or '(no output)'
+        except Exception as exc:
+            return f'ERROR: {exc}'
+
+    return [run_shell, read_file, write_file, list_directory, python_eval]
 
 
 def create_agent(environment: BaseEnvironment) -> Agent:
