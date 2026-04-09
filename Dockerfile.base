@@ -11,7 +11,7 @@ COPY pyproject.toml ./
 RUN uv pip install --system .
 
 # Agent code
-COPY agent.py ./
+COPY harness/ ./harness/
 
 RUN ln -sf $(which python3) /usr/local/bin/python
 RUN mkdir -p /logs /app/output
