@@ -60,10 +60,10 @@ docker build -f Dockerfile.base -t autoagent-base .
 # 5. Add tasks to tasks/ (see Task format section below)
 
 # 6. Run a single benchmark task
-rm -rf jobs; mkdir -p jobs && uv run harbor run -p tasks/ --task-name "<task-name>" -l 1 -n 1 --agent-import-path agent:AutoAgent -o jobs --job-name latest > run.log 2>&1
+rm -rf jobs; mkdir -p jobs && uv run harbor run -p tasks/ --task-name "<task-name>" -l 1 -n 1 --agent-import-path harness:AutoAgent -o jobs --job-name latest > run.log 2>&1
 
 # 7. Run all tasks in parallel (-n = concurrency, default 4)
-rm -rf jobs; mkdir -p jobs && uv run harbor run -p tasks/ -n 100 --agent-import-path agent:AutoAgent -o jobs --job-name latest > run.log 2>&1
+rm -rf jobs; mkdir -p jobs && uv run harbor run -p tasks/ -n 100 --agent-import-path harness:AutoAgent -o jobs --job-name latest > run.log 2>&1
 ```
 
 ## Running the meta-agent
