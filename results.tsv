@@ -1,1 +1,2 @@
 eb3f185	0.0	0/1	0.0	0.0	keep	Added specialized tools (read_file, write_file, list_directory) and updated SYSTEM_PROMPT to encourage planning.
+test-commit	0.0	0/1	0.0	0.0	keep	Added python_eval tool to evaluate python scripts
